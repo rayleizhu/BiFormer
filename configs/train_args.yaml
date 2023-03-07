@@ -1,0 +1,98 @@
+############ default args exported from main.py #########
+batch_size: 64
+epochs: 300
+model: deit_base_patch16_224
+input_size: 224
+drop: 0.0
+drop_path: 0.1
+model_ema: true
+model_ema_decay: 0.99996
+model_ema_force_cpu: false
+opt: adamw
+opt_eps: 1.0e-08
+opt_betas: null
+clip_grad: null
+momentum: 0.9
+weight_decay: 0.05
+sched: cosine
+lr: 0.0005
+lr_noise: null
+lr_noise_pct: 0.67
+lr_noise_std: 1.0
+warmup_lr: 1.0e-06
+min_lr: 1.0e-05
+decay_epochs: 30
+warmup_epochs: 5
+cooldown_epochs: 10
+patience_epochs: 10
+decay_rate: 0.1
+color_jitter: 0.4
+aa: rand-m9-mstd0.5-inc1
+smoothing: 0.1
+train_interpolation: bicubic
+repeated_aug: true
+reprob: 0.25
+remode: pixel
+recount: 1
+resplit: false
+mixup: 0.8
+cutmix: 1.0
+cutmix_minmax: null
+mixup_prob: 1.0
+mixup_switch_prob: 0.5
+mixup_mode: batch
+teacher_model: regnety_160
+teacher_path: ''
+distillation_type: none
+distillation_alpha: 0.5
+distillation_tau: 1.0
+finetune: ''
+data_path: /datasets01/imagenet_full_size/061417/
+data_set: IMNET
+inat_category: name
+output_dir: ''
+device: cuda
+seed: 0
+resume: ''
+start_epoch: 0
+eval: false
+dist_eval: false
+num_workers: 10
+pin_mem: true
+world_size: 1
+dist_url: env://
+#########################################
+
+project: biformer
+log_dir: ${output_dir}/tf_record_log # for tensorboard logging
+load_release: false # load relased checkpoints (e.g. for evaluation)
+
+# defaults:
+#   # https://hydra.cc/docs/1.2/upgrades/1.0_to_1.1/default_composition_order/
+#   - _self_ # this makes options in groups (subdirs) has higher priority
+#   - pavi: default
+#   # - _self_ # this makes options in groups (subdirs) has lower priority
+
+hydra:
+  run:
+    dir: "outputs/cls/${hydra.job.override_dirname}/${now:%Y%m%d-%H:%M:%S}"
+  # https://hydra.cc/docs/configure_hydra/workdir/
+  sweep:
+    dir: multirun
+    subdir: ${hydra.job.override_dirname}
+  job:
+    config:
+      override_dirname:
+        kv_sep: '.'
+        item_sep: '-'
+        exclude_keys:
+          - slurm
+          - slurm.quotatype
+          - pavi.name
+          - pavi.description
+          - resume
+          - output_dir
+          - log_dir
+          - data_path
+          - dist_url
+          - dist_eval

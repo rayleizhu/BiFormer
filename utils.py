@@ -20,7 +20,8 @@ import torch
 import torch.distributed as dist
 from torch._six import inf
 
-from tensorboardX import SummaryWriter
+from torch.utils.tensorboard import SummaryWriter
+import subprocess
 
 class SmoothedValue(object):
     """Track a series of values and provide access to smoothed values over a
@@ -168,87 +169,6 @@ class MetricLogger(object):
             header, total_time_str, total_time / len(iterable)))
 
 
-class TensorboardLogger(object):
-    def __init__(self, log_dir):
-        self.writer = SummaryWriter(logdir=log_dir)
-        self.step = 0
-
-    def set_step(self, step=None):
-        if step is not None:
-            self.step = step
-        else:
-            self.step += 1
-
-    def update(self, head='scalar', step=None, **kwargs):
-        for k, v in kwargs.items():
-            if v is None:
-                continue
-            if isinstance(v, torch.Tensor):
-                v = v.item()
-            assert isinstance(v, (float, int))
-            self.writer.add_scalar(head + "/" + k, v, self.step if step is None else step)
-
-    def flush(self):
-        self.writer.flush()
-
-
-class WandbLogger(object):
-    def __init__(self, args):
-        self.args = args
-
-        try:
-            import wandb
-            self._wandb = wandb
-        except ImportError:
-            raise ImportError(
-                "To use the Weights and Biases Logger please install wandb."
-                "Run `pip install wandb` to install it."
-            )
-
-        # Initialize a W&B run 
-        if self._wandb.run is None:
-            self._wandb.init(
-                project=args.project,
-                config=args
-            )
-
-    def log_epoch_metrics(self, metrics, commit=True):
-        """
-        Log train/test metrics onto W&B.
-        """
-        # Log number of model parameters as W&B summary
-        self._wandb.summary['n_parameters'] = metrics.get('n_parameters', None)
-        metrics.pop('n_parameters', None)
-
-        # Log current epoch
-        self._wandb.log({'epoch': metrics.get('epoch')}, commit=False)
-        metrics.pop('epoch')
-
-        for k, v in metrics.items():
-            if 'train' in k:
-                self._wandb.log({f'Global Train/{k}': v}, commit=False)
-            elif 'test' in k:
-                self._wandb.log({f'Global Test/{k}': v}, commit=False)
-
-        self._wandb.log({})
-
-    def log_checkpoints(self):
-        output_dir = self.args.output_dir
-        model_artifact = self._wandb.Artifact(
-            self._wandb.run.id + "_model", type="model"
-        )
-
-        model_artifact.add_dir(output_dir)
-        self._wandb.log_artifact(model_artifact, aliases=["latest", "best"])
-
-    def set_steps(self):
-        # Set global training step
-        self._wandb.define_metric('Rank-0 Batch Wise/*', step_metric='Rank-0 Batch Wise/global_train_step')
-        # Set epoch-wise step
-        self._wandb.define_metric('Global Train/*', step_metric='epoch')
-        self._wandb.define_metric('Global Test/*', step_metric='epoch')
-
-
 def setup_for_distributed(is_master):
     """
     This function disables printing when not in master process
@@ -295,26 +215,42 @@ def save_on_master(*args, **kwargs):
 
 def init_distributed_mode(args):
 
-    if args.dist_on_itp:
-        args.rank = int(os.environ['OMPI_COMM_WORLD_RANK'])
-        args.world_size = int(os.environ['OMPI_COMM_WORLD_SIZE'])
-        args.gpu = int(os.environ['OMPI_COMM_WORLD_LOCAL_RANK'])
-        args.dist_url = "tcp://%s:%s" % (os.environ['MASTER_ADDR'], os.environ['MASTER_PORT'])
-        os.environ['LOCAL_RANK'] = str(args.gpu)
-        os.environ['RANK'] = str(args.rank)
-        os.environ['WORLD_SIZE'] = str(args.world_size)
-        # ["RANK", "WORLD_SIZE", "MASTER_ADDR", "MASTER_PORT", "LOCAL_RANK"]
-    elif 'RANK' in os.environ and 'WORLD_SIZE' in os.environ:
+    # if args.dist_on_itp:
+    #     args.rank = int(os.environ['OMPI_COMM_WORLD_RANK'])
+    #     args.world_size = int(os.environ['OMPI_COMM_WORLD_SIZE'])
+    #     args.gpu = int(os.environ['OMPI_COMM_WORLD_LOCAL_RANK'])
+    #     args.dist_url = "tcp://%s:%s" % (os.environ['MASTER_ADDR'], os.environ['MASTER_PORT'])
+    #     os.environ['LOCAL_RANK'] = str(args.gpu)
+    #     os.environ['RANK'] = str(args.rank)
+    #     os.environ['WORLD_SIZE'] = str(args.world_size)
+    #     # ["RANK", "WORLD_SIZE", "MASTER_ADDR", "MASTER_PORT", "LOCAL_RANK"]
+    # elif 'RANK' in os.environ and 'WORLD_SIZE' in os.environ:
+    if 'RANK' in os.environ and 'WORLD_SIZE' in os.environ:
         args.rank = int(os.environ["RANK"])
         args.world_size = int(os.environ['WORLD_SIZE'])
         args.gpu = int(os.environ['LOCAL_RANK'])
     elif 'SLURM_PROCID' in os.environ:
+        ######################################
+        # NOTE: using file://xxxx as dis_url is not stable
+        # https://shomy.top/2022/01/05/torch-ddp-intro/
+        if args.slurm.ddp_comm_mode == 'tcp':
+            node_list = os.environ['SLURM_NODELIST']
+            master_addr = subprocess.getoutput(f'scontrol show hostname {node_list} | head -n1')
+            
+            # explicit tcp url
+            args.dist_url = "tcp://%s:%s"%(master_addr, args.slurm.master_port)
+
+            # alternatively, use env vars as below
+            # os.environ['MASTER_ADDR'] = master_addr
+            # os.environ['MASTER_PORT'] = f'{args.slurm.master_port}'
+            # os.environ['RANK'] = str(args.rank)
+            # os.environ['LOCAL_RANK'] = str(args.rank % torch.cuda.device_count())
+            # os.environ['WORLD_SIZE'] = str(args.world_size)
+            # args.dist_url = "env://"
+        ######################################
+
         args.rank = int(os.environ['SLURM_PROCID'])
         args.gpu = args.rank % torch.cuda.device_count()
-
-        os.environ['RANK'] = str(args.rank)
-        os.environ['LOCAL_RANK'] = str(args.gpu)
-        os.environ['WORLD_SIZE'] = str(args.world_size)
     else:
         print('Not using distributed mode')
         args.distributed = False
@@ -505,3 +441,14 @@ def auto_load_model(args, model, model_without_ddp, optimizer, loss_scaler, mode
             if 'scaler' in checkpoint:
                 loss_scaler.load_state_dict(checkpoint['scaler'])
             print("With optim & sched!")
+
+
+def all_reduce_mean(x):
+    world_size = get_world_size()
+    if world_size > 1:
+        x_reduce = torch.tensor(x).cuda()
+        dist.all_reduce(x_reduce)
+        x_reduce /= world_size
+        return x_reduce.item()
+    else:
+        return x

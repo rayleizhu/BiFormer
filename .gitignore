@@ -1,6 +1,8 @@
+data
 local*
+outputs/
 __pycache__
 .pyc
 
-det/
-seg/
+object_detection/
+semantic_segmentation/

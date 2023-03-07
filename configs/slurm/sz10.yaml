@@ -1,0 +1,19 @@
+
+partition: "mediasuper" # Partition where to submit
+ngpus: 8 # Number of gpus to request on each node
+nodes: 1 # Number of nodes to request
+cpus_per_task: 5 # Number of cpus per task/gpu
+timeout: 240 # Duration of the job, in hours
+job_name: "${model}" # job_name to display with `squeue`
+job_dir: ~ # Job directory; leave empty for default (hydra.run.dir)
+# exclude_node: "SZ-IDC1-10-112-2-10" # The node(s) to be excluded for slurm assignment
+exclude_node: ~ # The node(s) to be excluded for slurm assignment
+comment: ~ # Comment to pass to scheduler, e.g. priority message
+quotatype: ~
+
+ddp_comm_mode: "tcp" # ddp communication mode, "file" or "tcp"
+# position to put DDP communication file (as an alternative of port based sychronisation)
+# this path must be accessible by all machines, for "file" mode only
+share_root: "/mnt/lustre/zhulei1/checkpoint/${project}"
+master_port: 29500 # for "tcp" mode only
+

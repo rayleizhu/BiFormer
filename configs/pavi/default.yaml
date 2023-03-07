@@ -1,0 +1,5 @@
+project: ${project}
+name: ~ # experiment name, leave null to use ${hydra.job.override_dirname}
+tag: classification
+description: ~ # decription, leave null to use default style defined in hydra_pretrain.py 
+log_dir: /tmp/zhulei1/pavi_runs/${.tag}/${.name}
