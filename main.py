@@ -1,36 +1,46 @@
-# modified from https://github.com/Sense-X/UniFormer/blob/main/image_classification/main.py
+"""
+Modified from https://github.com/Sense-X/UniFormer/blob/main/image_classification/main.py
+
+All modifications are for user experience only, including:
+
+* Adding tensorboard logger
+
+No modifcations on training logic or hyperparameters.
+
+author: ZHU Lei
+github: https://github.com/rayleizhu
+email: ray.leizhu@outlook.com
+
+This source code is licensed under the license found in the
+LICENSE file in the root directory of this source tree.
+"""
 import argparse
 import datetime
-import numpy as np
-import time
-import torch
-import torch.backends.cudnn as cudnn
 import json
-
+import os
+import time
 from pathlib import Path
 
+import numpy as np
+import torch
+import torch.backends.cudnn as cudnn
+from fvcore.nn import FlopCountAnalysis, flop_count_table
 from timm.data import Mixup
-from timm.models import create_model
 from timm.loss import LabelSmoothingCrossEntropy, SoftTargetCrossEntropy
-from timm.scheduler import create_scheduler
+from timm.models import create_model
 from timm.optim import create_optimizer
-from timm.utils import NativeScaler, get_state_dict, ModelEma
-
-from fvcore.nn import FlopCountAnalysis
-from fvcore.nn import flop_count_table
-
-from datasets import build_dataset
-from engine import train_one_epoch, evaluate
-from losses import DistillationLoss
-from samplers import RASampler
-import utils
-import os
+from timm.scheduler import create_scheduler
+from timm.utils import ModelEma, NativeScaler, get_state_dict
+from torch.utils.tensorboard import SummaryWriter
 
 import models.biformer
-import models.maxvit_stl
 import models.biformer_stl
-
-from torch.utils.tensorboard import SummaryWriter
+import models.maxvit_stl
+import utils
+from datasets import build_dataset
+from engine import evaluate, train_one_epoch
+from losses import DistillationLoss
+from samplers import RASampler
 
 
 def get_args_parser():

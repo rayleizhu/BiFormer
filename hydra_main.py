@@ -1,9 +1,19 @@
-# Copyright (c) Meta Platforms, Inc. and affiliates.
+"""
+This script is modified from https://github.com/facebookresearch/ConvNeXt/blob/main/run_with_submitit.py
 
-# All rights reserved.
+Modifications:
 
-# This source code is licensed under the license found in the
-# LICENSE file in the root directory of this source tree.
+* Using hydra to manage arguments and generate experiment dir according to argument overrides
+* Surpporting both tcp/file mode of DDP communication. Finding free tcp port automatically.
+* Change slurm flags to support SenseTime cluster environment.
+
+author: ZHU Lei
+github: https://github.com/rayleizhu
+email: ray.leizhu@outlook.com
+
+This source code is licensed under the license found in the
+LICENSE file in the root directory of this source tree.
+"""
 
 import os
 import uuid

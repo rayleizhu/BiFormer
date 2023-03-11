@@ -19,11 +19,13 @@ class="center">
 
 | name | resolution |acc@1 | #params | FLOPs | model | log | tensorboard log<sup>*</sup> |
 |:---:|:---:|:---:|:---:| :---:|:---:|:---:| :---:| 
-| BiFormer-T | 224x224 | 81.4 | 13.1 M | 2.2 G | [model](https://swfjkq.bn.files.1drv.com/y4m2NuXZIVOYWymYaQkhlZjv4hvxDlYAa9J_KJMtX4VAP2zH-VfWltt5Gb7EGJ-iPKoACFkpS_yGY8-Fdp7L5ioayU-o3SoBY6QsqBhp46pivkZX60n1TCTcM3T83lUackEsDDA5kz6Lyjh0zVP-ZU3_hbDu6YlMJRIM1P1y0CpHuEE2UKbCWg5MUlTrywHBszp/biformer_tiny_best.pth) | [log](https://public.bn.files.1drv.com/y4mVcUM0bsij64TVBvMNcet2KAfz_nZKJQtPyQCQmTb_3LTELOTrznNq3_uPJDfSO3ATSY7CifzicPtfiNjJv5fQAsQZSsaTZuWCTT07CRE6tZEbvbaXudeOpRoG8k_WxRcCuHmiC-h6LHHixQL-Q2RXf1ZDhGJSjY69QvMqrOoZbryiLajTWDKw6R84A4B4k8pIqLN8M_CsXVqOGNrA2PLhfIV1DLabTvoaWwTIZMCD38?AVOverride=1) | - |
-| BiFormer-S | 224x224 | 83.8 | 25.5 M | 4.5 G | [model](https://swguta.bn.files.1drv.com/y4mGZOPzLWa8fPl-9p74HhqkhmuJbSC6_bzH62_XKEOB8bRr5oldpqUbwRpHZ9la5vJo_PU4d4-0RLxjXkpQLHuiiTWlKNSGJ5N3yH7qhvB90GlWCU8cA3lND6Efz4qyx0IEmZ8D5GdIWs746vOlueE-VUVTR4sjOP6FAV4AE67ZQVf4sl5__ixUOQC5WDfRZqP/biformer_small_best.pth) | [log](https://public.bn.files.1drv.com/y4mYemBdj3zMGE2VdJ1Jz0OtDeWh_m_1QxmpJOh-XnUtmzQLbazQDOob1WGIqYIqBeAIFCmzAb0QbG5-w-nWrZ3YemyjEEyqArvcgebjeQ6-xWabtfhNqPef-85ahBzbda5VkuhO2-EHp5XvykZZ0nouDexikB7GImk7_7G6kP5AwJVePA0jyViPNfPVia1JBDHU3tSZzLYMFCV8f3o40DuTJKBy67Q5xtilGHLrX_C8HQ?AVOverride=1) |[tensorboard.dev](https://tensorboard.dev/experiment/VQAZonmIRjasGaVDPloM5Q/#scalars) |
-| BiFormer-B | 224x224 | 84.3 | 56.8 M | 9.8 G | [model](https://swf4yw.bn.files.1drv.com/y4mQFcsD6ZnpkWuXPF5Q18mEyVjO9ZclXAcJKp88y2TJ_Yh21SLgajCYL69RXELDdhf2FRz4pwQrkAaPBfkxhD-sC7VJGMJH463cYr7KJ5pOfg8qewBSQB5vFtFCezzEWRWU-1ibV8tHPzmcfrvsqTHnsV3uM4iVStatVgrM1PEHz_Id1Eohjijyt3RxqD6F33Q/biformer_base_best.pth) | [log](https://public.bn.files.1drv.com/y4mOwDRFxYjTPqxXFy0M4fs17M8RA4G5mZiiWm5HUvDeFT8yReGxNtsik7Te868ayKfwzJpnF5Kp7cbDHaDjm6y37mjyLztbk3QOJrSynM7sw_gFIHKlaUFb56fEBWH2V4zUOClTtJyLgnLdtdWGaN1csKZ2WH3ClegR2yDUf1WMjDqjBSuJVqSqNRn6xpQxGygqQ-dYj0H3WCW2gYNcGL3l2VhftDP5fjROP7a834ocgU?AVOverride=1) | - |
+| BiFormer-T | 224x224 | 81.4 | 13.1 M | 2.2 G | [model](https://matix.li/e36fe9fb086c) | [log](https://matix.li/7b7ca227852d) | - |
+| BiFormer-S | 224x224 | 83.8 | 25.5 M | 4.5 G | [model](https://matix.li/5bb436318902) | [log](https://matix.li/173324785feb) |[tensorboard.dev](https://tensorboard.dev/experiment/VQAZonmIRjasGaVDPloM5Q/#scalars) |
+| BiFormer-B | 224x224 | 84.3 | 56.8 M | 9.8 G | [model](https://matix.li/995db75f585d) | [log](https://matix.li/da2bff937647) | - |
 
 <font size=1>* : reproduced after the acceptance of our paper.</font>
+
+All files can be accessed from [onedrive](https://1drv.ms/u/s!AkBbczdRlZvChGsXFqAA-PVnA-R8?e=IPlOCG).
 
 ## Installation
 Please check [INSTALL.md](INSTALL.md) for installation instructions. 

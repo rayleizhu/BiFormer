@@ -1,15 +1,28 @@
+"""
+BiFormer-STL (Swin-Tiny-Layout) model we used in ablation study.
+
+author: ZHU Lei
+github: https://github.com/rayleizhu
+email: ray.leizhu@outlook.com
+
+This source code is licensed under the license found in the
+LICENSE file in the root directory of this source tree.
+"""
+
 from collections import OrderedDict
 from typing import Tuple, Union
+
 import torch
 import torch.nn as nn
-from timm.models import register_model
-from timm.models.layers import trunc_normal_, to_2tuple, LayerNorm2d, DropPath
-
-from fairscale.nn.checkpoint import checkpoint_wrapper
-from ops.torch.bra import BiLevelRoutingAttention
 from einops.layers.torch import Rearrange
+from fairscale.nn.checkpoint import checkpoint_wrapper
+from timm.models import register_model
+from timm.models.layers import DropPath, LayerNorm2d, to_2tuple, trunc_normal_
+
+from ops.torch.bra import BiLevelRoutingAttention
 
 from ._common import Attention, AttentionLePE
+
 
 class BiFormerBlock(nn.Module):
     """

@@ -1,25 +1,36 @@
-# Copyright (c) 2015-present, Facebook, Inc.
-# All rights reserved.
+"""
+BiFormer impl.
+
+author: ZHU Lei
+github: https://github.com/rayleizhu
+email: ray.leizhu@outlook.com
+
+This source code is licensed under the license found in the
+LICENSE file in the root directory of this source tree.
+"""
+import math
 from collections import OrderedDict
+from functools import partial
+from typing import Optional, Union
+
 import torch
 import torch.nn as nn
-from functools import partial
 import torch.nn.functional as F
-import math
-
-from timm.models.vision_transformer import _cfg
-from timm.models import register_model
-from timm.models.layers import trunc_normal_, DropPath, to_2tuple
-from ops.torch.bra import BiLevelRoutingAttention
 from einops import rearrange
 from einops.layers.torch import Rearrange
+from fairscale.nn.checkpoint import checkpoint_wrapper
+from timm.models import register_model
+from timm.models.layers import DropPath, to_2tuple, trunc_normal_
+from timm.models.vision_transformer import _cfg
+
+from ops.torch.bra import BiLevelRoutingAttention
+
 from ._common import Attention, AttentionLePE, DWConv
+
 # from positional_encodings import PositionalEncodingPermute2D, Summer
 # from siren_pytorch import SirenNet
 
-from fairscale.nn.checkpoint import checkpoint_wrapper
 
-from typing import Optional, Union
 
 def get_pe_layer(emb_dim, pe_dim=None, name='none'):
     if name == 'none':
@@ -400,9 +411,9 @@ class BiFormer(nn.Module):
 
 # TODO: update model urls
 model_urls = {
-    "biformer_tiny_in1k": "https://swfjkq.bn.files.1drv.com/y4m2NuXZIVOYWymYaQkhlZjv4hvxDlYAa9J_KJMtX4VAP2zH-VfWltt5Gb7EGJ-iPKoACFkpS_yGY8-Fdp7L5ioayU-o3SoBY6QsqBhp46pivkZX60n1TCTcM3T83lUackEsDDA5kz6Lyjh0zVP-ZU3_hbDu6YlMJRIM1P1y0CpHuEE2UKbCWg5MUlTrywHBszp/biformer_tiny_best.pth",
-    "biformer_small_in1k": "https://swguta.bn.files.1drv.com/y4mGZOPzLWa8fPl-9p74HhqkhmuJbSC6_bzH62_XKEOB8bRr5oldpqUbwRpHZ9la5vJo_PU4d4-0RLxjXkpQLHuiiTWlKNSGJ5N3yH7qhvB90GlWCU8cA3lND6Efz4qyx0IEmZ8D5GdIWs746vOlueE-VUVTR4sjOP6FAV4AE67ZQVf4sl5__ixUOQC5WDfRZqP/biformer_small_best.pth",
-    "biformer_base_in1k": "https://swf4yw.bn.files.1drv.com/y4mQFcsD6ZnpkWuXPF5Q18mEyVjO9ZclXAcJKp88y2TJ_Yh21SLgajCYL69RXELDdhf2FRz4pwQrkAaPBfkxhD-sC7VJGMJH463cYr7KJ5pOfg8qewBSQB5vFtFCezzEWRWU-1ibV8tHPzmcfrvsqTHnsV3uM4iVStatVgrM1PEHz_Id1Eohjijyt3RxqD6F33Q/biformer_base_best.pth",
+    "biformer_tiny_in1k": "https://matix.li/e36fe9fb086c",
+    "biformer_small_in1k": "https://matix.li/5bb436318902",
+    "biformer_base_in1k": "https://matix.li/995db75f585d",
 }
 
 
@@ -432,8 +443,9 @@ def biformer_tiny(pretrained=False, pretrained_cfg=None,
     model.default_cfg = _cfg()
 
     if pretrained:
-        url = model_urls['biformer_tiny_in1k']
-        checkpoint = torch.hub.load_state_dict_from_url(url=url, map_location="cpu", check_hash=True)
+        model_key = 'biformer_tiny_in1k'
+        url = model_urls[model_key]
+        checkpoint = torch.hub.load_state_dict_from_url(url=url, map_location="cpu", check_hash=True, file_name=f"{model_key}.pth")
         model.load_state_dict(checkpoint["model"])
 
     return model
@@ -463,8 +475,9 @@ def biformer_small(pretrained=False, pretrained_cfg=None,
     model.default_cfg = _cfg()
 
     if pretrained:
-        url = model_urls['biformer_small_in1k']
-        checkpoint = torch.hub.load_state_dict_from_url(url=url, map_location="cpu", check_hash=True)
+        model_key = 'biformer_small_in1k'
+        url = model_urls[model_key]
+        checkpoint = torch.hub.load_state_dict_from_url(url=url, map_location="cpu", check_hash=True, file_name=f"{model_key}.pth")
         model.load_state_dict(checkpoint["model"])
 
     return model
@@ -476,8 +489,8 @@ def biformer_base(pretrained=False, pretrained_cfg=None,
     model = BiFormer(
         depth=[4, 4, 18, 4],
         embed_dim=[96, 192, 384, 768], mlp_ratios=[3, 3, 3, 3],
-        use_checkpoint_stages=[0, 1, 2, 3],
-        # use_checkpoint_stages=[],
+        # use_checkpoint_stages=[0, 1, 2, 3],
+        use_checkpoint_stages=[],
         #------------------------------
         n_win=7,
         kv_downsample_mode='identity',
@@ -496,8 +509,9 @@ def biformer_base(pretrained=False, pretrained_cfg=None,
     model.default_cfg = _cfg()
 
     if pretrained:
-        url = model_urls['biformer_base_in1k']
-        checkpoint = torch.hub.load_state_dict_from_url(url=url, map_location="cpu", check_hash=True)
+        model_key = 'biformer_base_in1k'
+        url = model_urls[model_key]
+        checkpoint = torch.hub.load_state_dict_from_url(url=url, map_location="cpu", check_hash=True, file_name=f"{model_key}.pth")
         model.load_state_dict(checkpoint["model"])
 
     return model
