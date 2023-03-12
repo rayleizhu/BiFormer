@@ -14,6 +14,7 @@ from typing import Tuple
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from einops import rearrange
 from torch import Tensor
 
@@ -116,7 +117,8 @@ class BiLevelRoutingAttention(nn.Module):
     """
     def __init__(self, dim, num_heads=8, n_win=7, qk_dim=None, qk_scale=None,
                  kv_per_win=4, kv_downsample_ratio=4, kv_downsample_kernel=None, kv_downsample_mode='identity',
-                 topk=4, param_attention="qkvo", param_routing=False, diff_routing=False, soft_routing=False, side_dwconv=3):
+                 topk=4, param_attention="qkvo", param_routing=False, diff_routing=False, soft_routing=False, side_dwconv=3,
+                 auto_pad=False):
         super().__init__()
         # local attention setting
         self.dim = dim
@@ -196,6 +198,8 @@ class BiLevelRoutingAttention(nn.Module):
         # softmax for local attention
         self.attn_act = nn.Softmax(dim=-1)
 
+        self.auto_pad=auto_pad
+
     def forward(self, x, ret_attn_mask=False):
         """
         x: NHWC tensor
@@ -203,8 +207,21 @@ class BiLevelRoutingAttention(nn.Module):
         Return:
             NHWC tensor
         """
-        N, H, W, C = x.size()
-        assert H%self.n_win == 0 and W%self.n_win == 0 #
+         # NOTE: use padding for semantic segmentation
+        ###################################################
+        if self.auto_pad:
+            N, H_in, W_in, C = x.size()
+
+            pad_l = pad_t = 0
+            pad_r = (self.n_win - W_in % self.n_win) % self.n_win
+            pad_b = (self.n_win - H_in % self.n_win) % self.n_win
+            x = F.pad(x, (0, 0, pad_l, pad_r, pad_t, pad_b))
+            _, H, W, _ = x.size() # padded size
+        else:
+            N, H, W, C = x.size()
+            assert H%self.n_win == 0 and W%self.n_win == 0 #
+        ###################################################
+
 
         # patchify, (n, p^2, w, w, c), keep 2d window as we need 2d pooling to reduce kv size
         x = rearrange(x, "n (j h) (i w) c -> n (j i) h w c", j=self.n_win, i=self.n_win)
@@ -253,6 +270,11 @@ class BiLevelRoutingAttention(nn.Module):
         out = out + lepe
         # output linear
         out = self.wo(out)
+
+        # NOTE: use padding for semantic segmentation
+        # crop padded region
+        if self.auto_pad and (pad_r > 0 or pad_b > 0):
+            out = out[:, :H_in, :W_in, :].contiguous()
 
         if ret_attn_mask:
             return out, r_weight, r_idx, attn_weight

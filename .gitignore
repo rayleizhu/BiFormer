@@ -1,6 +1,6 @@
 data
 local*
-outputs/
+outputs*
 __pycache__
 .pyc
 
