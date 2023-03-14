@@ -10,18 +10,107 @@ This source code is licensed under the license found in the
 LICENSE file in the root directory of this source tree.
 """
 from collections import OrderedDict
+from functools import partial
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from fairscale.nn.checkpoint import checkpoint_wrapper
 from timm.models import register_model
 from timm.models.layers import LayerNorm2d, to_2tuple, trunc_normal_
-from timm.models.maxxvit import MaxxVitTransformerCfg, PartitionAttention2d
+# from timm.models.maxxvit import MaxxVitTransformerCfg, PartitionAttention2d
+from timm.models.maxxvit import (Attention2d, ConvMlp, DropPath, LayerScale2d,
+                                 MaxxVitTransformerCfg, get_act_layer,
+                                 get_norm_layer, get_rel_pos_cls,
+                                 grid_partition_nchw, grid_reverse_nchw,
+                                 window_partition_nchw, window_reverse_nchw)
+
+
+class PartitionAttention2d(nn.Module):
+    """ Grid or Block partition + Attn + FFN
+
+    '2D' NCHW tensor layout.
+    """
+
+    def __init__(
+            self,
+            dim: int,
+            partition_type: str = 'block',
+            cfg: MaxxVitTransformerCfg = MaxxVitTransformerCfg(),
+            drop_path: float = 0.,
+            auto_pad=False
+    ):
+        super().__init__()
+        norm_layer = partial(get_norm_layer(cfg.norm_layer), eps=cfg.norm_eps)  # NOTE this block is channels-last
+        act_layer = get_act_layer(cfg.act_layer)
+
+        self.partition_block = partition_type == 'block'
+        self.partition_size = to_2tuple(cfg.window_size if self.partition_block else cfg.grid_size)
+        rel_pos_cls = get_rel_pos_cls(cfg, self.partition_size)
+
+        self.norm1 = norm_layer(dim)
+        self.attn = Attention2d(
+            dim,
+            dim,
+            dim_head=cfg.dim_head,
+            bias=cfg.attn_bias,
+            head_first=cfg.head_first,
+            rel_pos_cls=rel_pos_cls,
+            attn_drop=cfg.attn_drop,
+            proj_drop=cfg.proj_drop,
+        )
+        self.ls1 = LayerScale2d(dim, init_values=cfg.init_values) if cfg.init_values else nn.Identity()
+        self.drop_path1 = DropPath(drop_path) if drop_path > 0. else nn.Identity()
+
+        self.norm2 = norm_layer(dim)
+        self.mlp = ConvMlp(
+            in_features=dim,
+            hidden_features=int(dim * cfg.expand_ratio),
+            act_layer=act_layer,
+            drop=cfg.proj_drop)
+        self.ls2 = LayerScale2d(dim, init_values=cfg.init_values) if cfg.init_values else nn.Identity()
+        self.drop_path2 = DropPath(drop_path) if drop_path > 0. else nn.Identity()
+
+        self.auto_pad = auto_pad
+
+    def _partition_attn(self, x):
+        partition_size = self.partition_size[0]
+        pad_l = pad_t = 0
+        if self.auto_pad:
+            _, _, H_in, W_in = x.size()
+            pad_r = (partition_size - W_in % partition_size) % partition_size
+            pad_b = (partition_size - H_in % partition_size) % partition_size
+            x = F.pad(x, (pad_l, pad_r, # dim=-1
+                          pad_t, pad_b, # dim=-2
+                          0, 0))
+        
+        img_size = x.shape[-2:]
+        if self.partition_block:
+            partitioned = window_partition_nchw(x, self.partition_size)
+        else:
+            partitioned = grid_partition_nchw(x, self.partition_size)
+
+        partitioned = self.attn(partitioned)
+
+        if self.partition_block:
+            x = window_reverse_nchw(partitioned, self.partition_size, img_size)
+        else:
+            x = grid_reverse_nchw(partitioned, self.partition_size, img_size)
+        
+        if self.auto_pad and (pad_r > 0 or pad_b > 0):
+            x = x[:, :, :H_in, :W_in].contiguous()
+        
+        return x
+
+    def forward(self, x):
+        x = x + self.drop_path1(self.ls1(self._partition_attn(self.norm1(x))))
+        x = x + self.drop_path2(self.ls2(self.mlp(self.norm2(x))))
+        return x
 
 
 class BasicLayer(nn.Module):
     def __init__(self, dim, depth, num_heads, grid_window_size=7,
-                 mlp_ratio=4., drop_path=0.):
+                 mlp_ratio=4., drop_path=0., auto_pad=False):
 
         super().__init__()
         self.dim = dim
@@ -44,6 +133,7 @@ class BasicLayer(nn.Module):
                 partition_type='block' if (i % 2 == 0) else 'grid',
                 cfg=transformer_cfg,
                 drop_path=drop_path[i] if isinstance(drop_path, list) else drop_path,
+                auto_pad=auto_pad
             )
             for i in range(depth)
         ])
@@ -70,10 +160,11 @@ class MaxViTSTL(nn.Module):
                  use_checkpoint_stages=[],
                  ########
                  grid_window_size=7,
-                 # before_attn_dwconv=3,
                  mlp_ratios=[4, 4, 4, 4],
                  norm_layer=LayerNorm2d,
-                 pre_head_norm_layer=None):
+                 pre_head_norm_layer=None,
+                 auto_pad=False,
+                 ):
         super().__init__()
         self.num_classes = num_classes
         self.num_features = self.embed_dim = embed_dim  # num_features for consistency with other models
@@ -109,7 +200,8 @@ class MaxViTSTL(nn.Module):
                                num_heads=nheads[i], 
                                grid_window_size=grid_window_size,
                                mlp_ratio=mlp_ratios[i],
-                               drop_path=dp_rates[sum(depth[:i]):sum(depth[:i+1])])
+                               drop_path=dp_rates[sum(depth[:i]):sum(depth[:i+1])],
+                               auto_pad=auto_pad)
             if i in use_checkpoint_stages:
                 stage = checkpoint_wrapper(stage)
             self.stages.append(stage)

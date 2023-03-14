@@ -99,7 +99,8 @@ If you find this repository helpful, please consider citing:
 - [ ] Add camera-ready paper link
 - [x] IN1k standard training code, log, and pretrained checkpoints
 - [ ] IN1k token-labeling code
-- [ ] Downstream transfer (detection, segmentation) code
+- [ ] Semantic segmentation code
+- [ ] Object detection code
 - [x] Swin-Tiny-Layout (STL) models
 - [ ] Refactor BRA and BiFormer code
 - [ ] Visualization demo 

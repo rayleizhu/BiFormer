@@ -215,7 +215,9 @@ class BiLevelRoutingAttention(nn.Module):
             pad_l = pad_t = 0
             pad_r = (self.n_win - W_in % self.n_win) % self.n_win
             pad_b = (self.n_win - H_in % self.n_win) % self.n_win
-            x = F.pad(x, (0, 0, pad_l, pad_r, pad_t, pad_b))
+            x = F.pad(x, (0, 0, # dim=-1
+                          pad_l, pad_r, # dim=-2
+                          pad_t, pad_b)) # dim=-3
             _, H, W, _ = x.size() # padded size
         else:
             N, H, W, C = x.size()
