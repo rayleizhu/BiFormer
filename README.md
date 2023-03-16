@@ -1,8 +1,8 @@
-# [BiFormer: Vision Transformer with Bi-Level Routing Attention](https://arxiv.org/)
+# [BiFormer: Vision Transformer with Bi-Level Routing Attention](https://arxiv.org/abs/2303.08810)
 
 Official PyTorch implementation of **BiFormer**, from the following paper:
 
-[BiFormer: Vision Transformer with Bi-Level Routing Attention](https://arxiv.org/). CVPR 2023.\
+[BiFormer: Vision Transformer with Bi-Level Routing Attention](https://arxiv.org/abs/2303.08810). CVPR 2023.\
 [Lei Zhu](https://github.com/rayleizhu), [Xinjiang Wang](https://www.linkedin.com/in/wang-xinjiang-784a3462), [Zhanghan Ke](https://zhke.io/), [Wayne Zhang](http://www.statfe.com/), and [Rynson Lau](https://www.cs.cityu.edu.hk/~rynson/)
 
 --- 
@@ -96,13 +96,13 @@ If you find this repository helpful, please consider citing:
 ```
 
 ## TODOs
-- [ ] Add camera-ready paper link
+- [x] Add camera-ready paper link
 - [x] IN1k standard training code, log, and pretrained checkpoints
 - [ ] IN1k token-labeling code
-- [ ] Semantic segmentation code
+- [x] Semantic segmentation code
 - [ ] Object detection code
 - [x] Swin-Tiny-Layout (STL) models
 - [ ] Refactor BRA and BiFormer code
 - [ ] Visualization demo 
 - [x] ~~More efficient implementation with triton~~. See [triton issue #1279](https://github.com/openai/triton/issues/1279)
-- [ ] More efficient implementation with CUDA
+- [ ] More efficient implementation (fusing gather and attention) with CUDA
