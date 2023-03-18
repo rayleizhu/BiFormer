@@ -215,6 +215,10 @@ class BiFormerSTL(nn.Module):
         return x
 
 
+model_urls = {
+    "biformer_stl_in1k": "https://matix.li/4e9034a91a23",
+}
+
 @register_model
 def biformer_stl(pretrained=False, pretrained_cfg=None,
                  pretrained_cfg_overlay=None, **kwargs):
@@ -229,4 +233,10 @@ def biformer_stl(pretrained=False, pretrained_cfg=None,
                         side_dwconv=5,
                         #######################################
                         **kwargs)
+    if pretrained:
+        model_key = 'biformer_stl_in1k'
+        url = model_urls[model_key]
+        checkpoint = torch.hub.load_state_dict_from_url(url=url, map_location="cpu", check_hash=True, file_name=f"{model_key}.pth")
+        model.load_state_dict(checkpoint["model"])
+
     return model

@@ -295,8 +295,6 @@ class BiFormer(nn.Module):
 #################### model variants #######################
 
 
-
-# TODO: update model urls
 model_urls = {
     "biformer_tiny_in1k": "https://matix.li/e36fe9fb086c",
     "biformer_small_in1k": "https://matix.li/5bb436318902",
