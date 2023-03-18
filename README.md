@@ -13,6 +13,16 @@ class="center">
 
 <!-- ✅ ⬜️  -->
 
+## News
+
+* 2023-03-18: We are improving the readability and efficiency of [BRA](ops/torch/bra.py), please stay tuned.
+  * We treaure reproducibility, hence keep the implementation we used during exploration stage. It is a little bit messy, as many components/arugments are not used, which may distract you.
+  * To make it more readable and friendly for optimization with CUDA, we are refactoring it. It is expected to be done in two weeks.
+  * After refactoring, we will start optimization with CUDA to make BRA more memory and computationally efficient. 
+  * Collaborations and contributions are welcome, especially if you are an expert in CUDA/[cutlass](https://github.com/NVIDIA/cutlass). There is a chance to co-author a paper.
+
+
+
 ## Results and Pre-trained Models
 
 ### ImageNet-1K trained models
