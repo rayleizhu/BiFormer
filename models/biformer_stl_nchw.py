@@ -1,6 +1,8 @@
 """
 BiFormer-STL (Swin-Tiny-Layout) model we used in ablation study.
 
+This implementation uses our refactored BRA, see ops/bra_nchw.py
+
 author: ZHU Lei
 github: https://github.com/rayleizhu
 email: ray.leizhu@outlook.com
@@ -10,6 +12,7 @@ LICENSE file in the root directory of this source tree.
 """
 
 from collections import OrderedDict
+from functools import partial
 from typing import Tuple, Union
 
 import torch
@@ -19,9 +22,8 @@ from fairscale.nn.checkpoint import checkpoint_wrapper
 from timm.models import register_model
 from timm.models.layers import DropPath, LayerNorm2d, to_2tuple, trunc_normal_
 
-from ops.bra_legacy import BiLevelRoutingAttention
-
-from ._common import Attention, AttentionLePE
+from ops.bra_nchw import nchwBRA
+from ._common import nchwAttentionLePE
 
 
 class BiFormerBlock(nn.Module):
@@ -29,29 +31,24 @@ class BiFormerBlock(nn.Module):
     Attention + FFN
     """
     def __init__(self, dim, drop_path=0., num_heads=8, n_win=7, 
-                 qk_dim=None, qk_scale=None, topk=4, mlp_ratio=4, side_dwconv=5):
+                       qk_scale=None, topk=4, mlp_ratio=4, side_dwconv=5, 
+                       norm_layer=LayerNorm2d):
+
         super().__init__()
-        qk_dim = qk_dim or dim
-        self.norm1 = nn.LayerNorm(dim, eps=1e-6) # important to avoid attention collapsing
+        self.norm1 = norm_layer(dim) # important to avoid attention collapsing
+        
         if topk > 0:
-            self.attn = BiLevelRoutingAttention(
-                dim=dim, num_heads=num_heads, n_win=n_win, qk_dim=qk_dim,
+            self.attn = nchwBRA(dim=dim, num_heads=num_heads, n_win=n_win,
                 qk_scale=qk_scale, topk=topk, side_dwconv=side_dwconv)
         elif topk == -1:
-            self.attn = Attention(dim=dim)
-        elif topk == -2:
-            self.attn = AttentionLePE(dim=dim, side_dwconv=side_dwconv)
-        elif topk == 0:
-            self.attn = nn.Sequential(Rearrange('n h w c -> n c h w'), # compatiability
-                                      nn.Conv2d(dim, dim, 1), # pseudo qkv linear
-                                      nn.Conv2d(dim, dim, 5, padding=2, groups=dim), # pseudo attention
-                                      nn.Conv2d(dim, dim, 1), # pseudo out linear
-                                      Rearrange('n c h w -> n h w c')
-                                     )
-        self.norm2 = nn.LayerNorm(dim, eps=1e-6)
-        self.mlp = nn.Sequential(nn.Linear(dim, int(mlp_ratio*dim)),
+            self.attn = nchwAttentionLePE(dim=dim)
+        else:
+            raise ValueError('topk should >0 or =-1 !')
+
+        self.norm2 = norm_layer(dim)
+        self.mlp = nn.Sequential(nn.Conv2d(dim, int(mlp_ratio*dim), kernel_size=1),
                                  nn.GELU(),
-                                 nn.Linear(int(mlp_ratio*dim), dim)
+                                 nn.Conv2d(int(mlp_ratio*dim), dim, kernel_size=1)
                                 )
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
             
@@ -59,13 +56,13 @@ class BiFormerBlock(nn.Module):
     def forward(self, x):
         """
         Args:
-            x: NHWC tensor
+            x: NCHW tensor
         Return:
-            NHWC tensor
+            NCHW tensor
         """
         # attention & mlp
-        x = x + self.drop_path(self.attn(self.norm1(x))) # (N, H, W, C)
-        x = x + self.drop_path(self.mlp(self.norm2(x))) # (N, H, W, C)
+        x = x + self.drop_path(self.attn(self.norm1(x))) # (N, C, H, W)
+        x = x + self.drop_path(self.mlp(self.norm2(x))) # (N, C, H, W)
         return x
 
 class BasicLayer(nn.Module):
@@ -99,18 +96,15 @@ class BasicLayer(nn.Module):
         Return:
             NCHW tensor
         """
-        # TODO: use fixed window size instead of fixed number of windows
-        x = x.permute(0, 2, 3, 1) # NHWC
         for blk in self.blocks:
             x = blk(x)
-        x = x.permute(0, 3, 1, 2) # NCHW
         return x
 
     def extra_repr(self) -> str:
         return f"dim={self.dim}, depth={self.depth}"
 
 
-class BiFormerSTL(nn.Module):
+class nchwBiFormerSTL(nn.Module):
     """
     Replace WindowAttn-ShiftWindowAttn in Swin-T model with Bi-Level Routing Attention
     """
@@ -216,25 +210,25 @@ class BiFormerSTL(nn.Module):
 
 
 model_urls = {
-    "biformer_stl_in1k": "https://matix.li/4e9034a91a23",
+    "biformer_stl_nchw_in1k": 'https://matix.li/216749d857fd',
 }
 
 @register_model
-def biformer_stl(pretrained=False, pretrained_cfg=None,
+def biformer_stl_nchw(pretrained=False, pretrained_cfg=None,
                  pretrained_cfg_overlay=None, **kwargs):
-    model = BiFormerSTL(depth=[2, 2, 6, 2],
+    model = nchwBiFormerSTL(depth=[2, 2, 6, 2],
                         embed_dim=[96, 192, 384, 768],
                         mlp_ratios=[4, 4, 4, 4],
                         head_dim=32,
                         norm_layer=nn.BatchNorm2d,
                         ######## biformer specific ############
                         n_wins=(7, 7, 7, 7),
-                        topks=(1, 4, 16, -2),
+                        topks=(1, 4, 16, -1),
                         side_dwconv=5,
                         #######################################
                         **kwargs)
     if pretrained:
-        model_key = 'biformer_stl_in1k'
+        model_key = 'biformer_stl_nchw_in1k'
         url = model_urls[model_key]
         checkpoint = torch.hub.load_state_dict_from_url(url=url, map_location="cpu", check_hash=True, file_name=f"{model_key}.pth")
         model.load_state_dict(checkpoint["model"])

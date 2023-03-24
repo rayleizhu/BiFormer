@@ -15,12 +15,10 @@ class="center">
 
 ## News
 
-* 2023-03-18: We are improving the readability and efficiency of [BRA](ops/torch/bra.py), please stay tuned.
-  * We treasure reproducibility, hence keep the implementation we used during exploration stage. It is a little bit messy, as many components/arugments are kept but not used, which may distract you.
-  * To make it more readable and optimization-friendly, we are refactoring the interface. This task is expected to be done in two weeks.
-  * After refactoring, we will start optimizing BRA with CUDA to make it more memory and computationally efficient. 
-  * Collaborations and contributions are welcome, especially if you are an expert in CUDA/[cutlass](https://github.com/NVIDIA/cutlass). There is a chance to co-author a paper.
+* 2023-03-24: For better readability, BRA and BiFormer-STL has been refactored. See [ops/bra_nchw.py](ops/bra_nchw.py) and [models/biformer_stl_nchw.py](models/biformer_stl_nchw.py). We still keep the [legacy (and a little bit messy) implementation](ops/bra_legacy.py) for compatiability of previously released checkpoints.
 
+* 2023-03-24: For better memory and computation efficieny, we are diving into the optimization of BRA with CUDA. Please stay tuned.
+  - Collaborations and contributions are welcome, especially if you are an expert in CUDA/[cutlass](https://github.com/NVIDIA/cutlass). There is a chance to co-author a paper.
 
 
 ## Results and Pre-trained Models
@@ -33,6 +31,7 @@ class="center">
 | BiFormer-S | 224x224 | 83.8 | 25.5 M | 4.5 G | [model](https://matix.li/5bb436318902) | [log](https://matix.li/173324785feb) |[tensorboard.dev](https://tensorboard.dev/experiment/VQAZonmIRjasGaVDPloM5Q/#scalars) |
 | BiFormer-B | 224x224 | 84.3 | 56.8 M | 9.8 G | [model](https://matix.li/995db75f585d) | [log](https://matix.li/da2bff937647) | - |
 | BiFormer-STL | 224x224 | 82.7 | 28.4 M | 4.6 G | [model](https://matix.li/4e9034a91a23) | [log](https://matix.li/96e971cfb3d5) | - |
+| BiFormer-STL-nchw | 224x224 | 82.7 | 28.4 M | 4.6 G | [model](https://matix.li/216749d857fd) | [log](https://matix.li/3373f282ee86) | [tensorboard.dev](https://tensorboard.dev/experiment/CD2QfxOYT6WQ05qnpWdK5A/#scalars&_smoothingWeight=0&tagFilter=acc) |
 
 <font size=1>* : reproduced after the acceptance of our paper.</font>
 
@@ -115,7 +114,7 @@ If you find this repository helpful, please consider citing:
 - [x] Semantic segmentation code
 - [ ] Object detection code
 - [x] Swin-Tiny-Layout (STL) models
-- [ ] Refactor BRA and BiFormer code
+- [x] Refactor BRA and BiFormer code
 - [ ] Visualization demo 
 - [x] ~~More efficient implementation with triton~~. See [triton issue #1279](https://github.com/openai/triton/issues/1279)
 - [ ] More efficient implementation (fusing gather and attention) with CUDA

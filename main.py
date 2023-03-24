@@ -36,6 +36,8 @@ from torch.utils.tensorboard import SummaryWriter
 import models.biformer
 import models.biformer_stl
 import models.maxvit_stl
+import models.biformer_stl_nchw
+
 import utils
 from datasets import build_dataset
 from engine import evaluate, train_one_epoch
