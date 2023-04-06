@@ -3,7 +3,7 @@
 Official PyTorch implementation of **BiFormer**, from the following paper:
 
 [BiFormer: Vision Transformer with Bi-Level Routing Attention](https://arxiv.org/abs/2303.08810). CVPR 2023.\
-[Lei Zhu](https://github.com/rayleizhu), [Xinjiang Wang](https://www.linkedin.com/in/wang-xinjiang-784a3462), [Zhanghan Ke](https://zhke.io/), [Wayne Zhang](http://www.statfe.com/), and [Rynson Lau](https://www.cs.cityu.edu.hk/~rynson/)
+[Lei Zhu](https://github.com/rayleizhu), [Xinjiang Wang](https://scholar.google.com/citations?user=q4lnWaoAAAAJ&hl=en), [Zhanghan Ke](https://zhke.io/), [Wayne Zhang](http://www.statfe.com/), and [Rynson Lau](https://www.cs.cityu.edu.hk/~rynson/)
 
 --- 
 <p align="left">
@@ -11,15 +11,15 @@ Official PyTorch implementation of **BiFormer**, from the following paper:
 class="center">
 </p>
 
+
 <!-- ✅ ⬜️  -->
 
 ## News
 
-* 2023-03-24: For better readability, BRA and BiFormer-STL has been refactored. See [ops/bra_nchw.py](ops/bra_nchw.py) and [models/biformer_stl_nchw.py](models/biformer_stl_nchw.py). We still keep the [legacy (and a little bit messy) implementation](ops/bra_legacy.py) for compatiability of previously released checkpoints.
-
 * 2023-03-24: For better memory and computation efficieny, we are diving into the optimization of BRA with CUDA. Please stay tuned.
   - Collaborations and contributions are welcome, especially if you are an expert in CUDA/[cutlass](https://github.com/NVIDIA/cutlass). There is a chance to co-author a paper.
 
+* 2023-03-24: For better readability, BRA and BiFormer-STL has been refactored. See [ops/bra_nchw.py](ops/bra_nchw.py) and [models/biformer_stl_nchw.py](models/biformer_stl_nchw.py). We still keep the [legacy (and a little bit messy) implementation](ops/bra_legacy.py) for compatiability of previously released checkpoints.
 
 ## Results and Pre-trained Models
 
@@ -98,7 +98,7 @@ This project is released under the MIT license. Please see the [LICENSE](LICENSE
 
 ## Citation
 If you find this repository helpful, please consider citing:
-```
+```bibtex
 @Article{zhu2022biformer,
   author  = {Lei Zhu and Xinjiang Wang and Zhanghan Ke and Wayne Zhang and Rynson Lau},
   title   = {BiFormer: Vision Transformer with Bi-Level Routing Attention},

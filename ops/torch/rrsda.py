@@ -115,6 +115,6 @@ def regional_routing_attention_torch(
 
     # remove paddings if needed
     if auto_pad and (q_pad_b > 0 or q_pad_r > 0):
-        output = output[:, :, :-q_pad_b, :-q_pad_r]
+        output = output[:, :, :Hq, :Wq]
 
     return output, attn

@@ -15,8 +15,9 @@ If you are using slurm clusters, it is recommended to create a slurm config file
 
 ```bash
 export CLUSTER_ID=[YOUR_CLUSTER_ALIAS]
-vim configs/slurm/${CLUSTER_ID}.yaml
+cp configs/slurm/sz10.yaml configs/slurm/${CLUSTER_ID}.yaml && vim configs/slurm/${CLUSTER_ID}.yaml
 ```
+hence you can launch experiments in any available cluster consistently with `+slurm=${CLUSTER_ID}`.
 
 ## Dataset Preparation
 
