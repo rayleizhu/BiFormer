@@ -111,6 +111,7 @@ dependencies:
       - colorama==0.4.6
       - contourpy==1.0.7
       - cycler==0.11.0
+      - cython==0.29.34
       - einops==0.6.0
       - fairscale==0.4.13
       - filelock==3.9.0
@@ -125,7 +126,9 @@ dependencies:
       - matplotlib==3.7.1
       - mdurl==0.1.2
       - mmcls==0.25.0
-      - mmcv-full==1.7.1
+      - mmcv-full==1.7.0
+      - mmdet==2.25.3
+      - mmpycocotools==12.0.3
       - mmsegmentation==0.30.0
       - model-index==0.1.11
       - omegaconf==2.3.0
@@ -146,6 +149,7 @@ dependencies:
       - submitit==1.4.5
       - tabulate==0.9.0
       - termcolor==2.2.0
+      - terminaltables==3.1.10
       - timm==0.8.15.dev0
       - tqdm==4.65.0
       - triton==1.1.1

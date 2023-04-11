@@ -16,6 +16,8 @@ class="center">
 
 ## News
 
+* 2023-04-11: [object detection code](./object_detection/) is released. It achives significantly better results than the paper reported due to a bug fix.
+
 * 2023-03-24: For better memory and computation efficieny, we are diving into the optimization of BRA with CUDA. Please stay tuned.
   - Collaborations and contributions are welcome, especially if you are an expert in CUDA/[cutlass](https://github.com/NVIDIA/cutlass). There is a chance to co-author a paper.
 
@@ -99,7 +101,7 @@ This project is released under the MIT license. Please see the [LICENSE](LICENSE
 ## Citation
 If you find this repository helpful, please consider citing:
 ```bibtex
-@Article{zhu2022biformer,
+@Article{zhu2023biformer,
   author  = {Lei Zhu and Xinjiang Wang and Zhanghan Ke and Wayne Zhang and Rynson Lau},
   title   = {BiFormer: Vision Transformer with Bi-Level Routing Attention},
   journal = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
@@ -112,7 +114,7 @@ If you find this repository helpful, please consider citing:
 - [x] IN1k standard training code, log, and pretrained checkpoints
 - [ ] IN1k token-labeling code
 - [x] Semantic segmentation code
-- [ ] Object detection code
+- [x] Object detection code
 - [x] Swin-Tiny-Layout (STL) models
 - [x] Refactor BRA and BiFormer code
 - [ ] Visualization demo 
