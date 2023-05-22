@@ -29,11 +29,11 @@ class="center">
 
 | name | resolution |acc@1 | #params | FLOPs | model | log | tensorboard log<sup>*</sup> |
 |:---:|:---:|:---:|:---:| :---:|:---:|:---:| :---:| 
-| BiFormer-T | 224x224 | 81.4 | 13.1 M | 2.2 G | [model](https://matix.li/e36fe9fb086c) | [log](https://matix.li/7b7ca227852d) | - |
-| BiFormer-S | 224x224 | 83.8 | 25.5 M | 4.5 G | [model](https://matix.li/5bb436318902) | [log](https://matix.li/173324785feb) |[tensorboard.dev](https://tensorboard.dev/experiment/VQAZonmIRjasGaVDPloM5Q/#scalars) |
-| BiFormer-B | 224x224 | 84.3 | 56.8 M | 9.8 G | [model](https://matix.li/995db75f585d) | [log](https://matix.li/da2bff937647) | - |
-| BiFormer-STL | 224x224 | 82.7 | 28.4 M | 4.6 G | [model](https://matix.li/4e9034a91a23) | [log](https://matix.li/96e971cfb3d5) | - |
-| BiFormer-STL-nchw | 224x224 | 82.7 | 28.4 M | 4.6 G | [model](https://matix.li/216749d857fd) | [log](https://matix.li/3373f282ee86) | [tensorboard.dev](https://tensorboard.dev/experiment/CD2QfxOYT6WQ05qnpWdK5A/#scalars&_smoothingWeight=0&tagFilter=acc) |
+| BiFormer-T | 224x224 | 81.4 | 13.1 M | 2.2 G | [model](https://api.onedrive.com/v1.0/shares/s!AkBbczdRlZvChHEOoGkgwgQzEDlM/root/content) | [log](https://1drv.ms/t/s!AkBbczdRlZvChHNvg1b_QV_Ptw_T?e=Tbuf4l) | - |
+| BiFormer-S | 224x224 | 83.8 | 25.5 M | 4.5 G | [model](https://api.onedrive.com/v1.0/shares/s!AkBbczdRlZvChHDyM-x9KWRBZ832/root/content) | [log](https://1drv.ms/t/s!AkBbczdRlZvChHQKrsNAo0PCpgWz?e=k7V8xX) |[tensorboard.dev](https://tensorboard.dev/experiment/VQAZonmIRjasGaVDPloM5Q/#scalars) |
+| BiFormer-B | 224x224 | 84.3 | 56.8 M | 9.8 G | [model](https://api.onedrive.com/v1.0/shares/s!AkBbczdRlZvChHI_XPhoadjaNxtO/root/content) | [log](https://1drv.ms/t/s!AkBbczdRlZvChHWq2YS_Iwryhf1g?e=GWiMy9) | - |
+| BiFormer-STL | 224x224 | 82.7 | 28.4 M | 4.6 G | [model](https://api.onedrive.com/v1.0/shares/s!AkBbczdRlZvChSf-m7ujkvx9lIQ1/root/content) | [log](https://1drv.ms/t/s!AkBbczdRlZvChSYWxeM5EmrC7-TN?e=W1q15P) | - |
+| BiFormer-STL-nchw | 224x224 | 82.7 | 28.4 M | 4.6 G | [model](https://api.onedrive.com/v1.0/shares/s!AkBbczdRlZvChWYrKbWbMgqd2Ai0/root/content) | [log](https://1drv.ms/t/s!AkBbczdRlZvChWf_axjI80DMWy4X?e=uni4Z2) | [tensorboard.dev](https://tensorboard.dev/experiment/CD2QfxOYT6WQ05qnpWdK5A/#scalars&_smoothingWeight=0&tagFilter=acc) |
 
 <font size=1>* : reproduced after the acceptance of our paper.</font>
 

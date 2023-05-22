@@ -216,7 +216,7 @@ class BiFormerSTL(nn.Module):
 
 
 model_urls = {
-    "biformer_stl_in1k": "https://matix.li/4e9034a91a23",
+    "biformer_stl_in1k": "https://api.onedrive.com/v1.0/shares/s!AkBbczdRlZvChSf-m7ujkvx9lIQ1/root/content",
 }
 
 @register_model

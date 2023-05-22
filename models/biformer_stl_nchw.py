@@ -210,7 +210,7 @@ class nchwBiFormerSTL(nn.Module):
 
 
 model_urls = {
-    "biformer_stl_nchw_in1k": 'https://matix.li/216749d857fd',
+    "biformer_stl_nchw_in1k": 'https://api.onedrive.com/v1.0/shares/s!AkBbczdRlZvChWYrKbWbMgqd2Ai0/root/content',
 }
 
 @register_model
